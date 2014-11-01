@@ -26,3 +26,9 @@
 *.exe
 *.out
 *.app
+
+# Matlab mex gateway
+*.mex*
+
+# MatPsi
+@MatPsi
