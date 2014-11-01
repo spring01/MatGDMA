@@ -2,7 +2,7 @@
 
 subroutine mexFunction(nlhs, plhs, nrhs, prhs)
 
-use gdma_driver_module
+use gdma_driver
 implicit none
 
 interface
@@ -55,7 +55,7 @@ input_args%primCoefs = InputVector(prhs(1), 'primCoefs')
 input_args%density = InputMatrix(prhs(1), 'density')
 input_args%bigexp = InputScalar(prhs(1), 'bigexp')
 
-call gdma_driver(q_out, input_args)
+call gdma_driver_routine(q_out, input_args)
 
 size_m = size(q_out,1)
 size_n = size(q_out,2)

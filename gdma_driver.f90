@@ -1,4 +1,4 @@
-MODULE gdma_driver_module
+MODULE gdma_driver
 
 TYPE gdma_input
     integer numSites, &
@@ -19,7 +19,7 @@ END TYPE
 
 CONTAINS
 
-SUBROUTINE gdma_driver(q_out, input_args)
+SUBROUTINE gdma_driver_routine(q_out, input_args)
 
 !  Distributed Multipole Analysis for Gaussian Wavefunctions
 !
@@ -392,18 +392,8 @@ end do
 first=.false.
 call dma_main(dtri,kp)
 
-!~ do i = 1, size(q_out, 1)
-!~     do j = 1, size(q_out, 2)
-!~         q_out(i, j) = q(i, j)
-!~     end do
-!~ end do
 q_out = q
-!~ deallocate(q)
-!~ deallocate(dtri, kstart, ktype, kloc)
-!~ deallocate(kstart, ktype, kloc, kmin, kmax, temp, cs, cp, iax)
 
-!~ deallocate(primCoefs, shell_type, shell_nfuncs)
+END SUBROUTINE gdma_driver_routine
 
-END SUBROUTINE gdma_driver
-
-END MODULE gdma_driver_module
+END MODULE gdma_driver
