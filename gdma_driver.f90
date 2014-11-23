@@ -1,14 +1,10 @@
 MODULE gdma_driver
 
 TYPE gdma_input
-    integer numSites, &
-            numShells, &
-            numPrims
     real(kind(1d0)) :: bigexp ! threshold for old/new algorithm
     integer, allocatable :: limit(:), & ! maximum order of multipole output, numSites by 1
                             shellNprims(:), &
                             shell2atom(:), &
-                            shellType(:), &
                             shellNfuncs(:)
     real(kind(1d0)), allocatable :: nucleiCharges(:), &
                                     xyzSites(:,:), & ! 3 by numSites, row-major
@@ -57,7 +53,7 @@ CHARACTER(LEN=24) :: datestring
 
 !  Maximum number of sites is number of atoms + nextra
 INTEGER :: nextra=16
-INTEGER :: ncoorb, maxl, cmax, nprim, nx, num, n, ich, mul
+INTEGER :: ncoorb, maxl, cmax, nprim, nx, num, n, ich, mul, nbf
 INTEGER, ALLOCATABLE :: shell_type(:), shell_nfuncs(:)
 INTEGER :: i, j, k, kp=0
 LOGICAL :: eof, fchk, first, ok=.false.
@@ -91,8 +87,7 @@ first=.true.
 
 !! Start input
 
-nat = input_args%numSites
-
+nat = size(input_args%limit)
 ! Deep copy zan = input_args%nucleiCharges
 if(allocated(zan)) deallocate(zan)
 allocate(zan(nat))
@@ -109,12 +104,6 @@ do i = 1, size(input_args%xyzSites, 1)
     end do
 end do
 
-!~ ich = XXX ! total charge
-!~ mul = XXX ! total multiplicity; I guess they just affect output print
-nshell = input_args%numShells
-nprim = input_args%numPrims
-bigexp = input_args%bigexp ! threshold for old/new algorithm
-
 ! Deep copy user_given_limit = input_args%limit ; maximum output multipole order
 if(allocated(user_given_limit)) deallocate(user_given_limit)
 allocate(user_given_limit(nat))
@@ -122,10 +111,14 @@ do i = 1, size(input_args%limit)
     user_given_limit(i) = input_args%limit(i)
 end do
 
+!~ ich = XXX ! total charge
+!~ mul = XXX ! total multiplicity; I guess they just affect output print
+
+nshell = size(input_args%shellNfuncs)
 ! Deep copy kng = input_args%shellNprims
 if(allocated(kng)) deallocate(kng)
 allocate(kng(nshell))
-do i = 1, size(input_args%shellNprims)
+do i = 1, nshell
     kng(i) = input_args%shellNprims(i)
 end do
 
@@ -133,46 +126,63 @@ end do
 if(allocated(katom)) deallocate(katom)
 allocate(katom(nshell+1))
 katom = 0
-do i = 1, size(input_args%shell2atom)
+do i = 1, nshell
     katom(i) = input_args%shell2atom(i)
-end do
-
-! Deep copy shell_type = input_args%shellType
-if(allocated(shell_type)) deallocate(shell_type)
-allocate(shell_type(nshell))
-do i = 1, size(input_args%shellType)
-    shell_type(i) = input_args%shellType(i)
 end do
 
 ! Deep copy shell_nfuncs = input_args%shellNfuncs
 if(allocated(shell_nfuncs)) deallocate(shell_nfuncs)
 allocate(shell_nfuncs(nshell))
-do i = 1, size(input_args%shellNfuncs)
+do i = 1, nshell
     shell_nfuncs(i) = input_args%shellNfuncs(i)
 end do
 
+! Determine shell_type according to shell_nfuncs
+if(allocated(shell_type)) deallocate(shell_type)
+allocate(shell_type(nshell))
+do i = 1, nshell
+    select case (shell_nfuncs(i))
+        case (1)
+            shell_type(i) = 0
+        case (3)
+            shell_type(i) = 1
+        case (5, 6)
+            shell_type(i) = 2
+        case (7, 10)
+            shell_type(i) = 3
+        case (9, 15)
+            shell_type(i) = 4
+        case default
+            shell_type(i) = -1
+    end select
+end do
+
+nprim = sum(input_args%shellNprims)
 ! Deep copy ex = input_args%primExps
 if(allocated(ex)) deallocate(ex)
 allocate(ex(nprim))
-do i = 1, size(input_args%primExps)
+do i = 1, nprim
     ex(i) = input_args%primExps(i)
 end do
 
 ! Deep copy primCoefs = input_args%primCoefs
 if(allocated(primCoefs)) deallocate(primCoefs)
 allocate(primCoefs(nprim))
-do i = 1, size(input_args%primCoefs)
+do i = 1, nprim
     primCoefs(i) = input_args%primCoefs(i)
 end do
 
+nbf = sum(shell_nfuncs)
 ! Deep copy input_density = input_args%density
 if(allocated(input_density)) deallocate(input_density)
-allocate(input_density(size(input_args%density, 1), size(input_args%density, 2)))
-do i = 1, size(input_args%density, 1)
-    do j = 1, size(input_args%density, 2)
+allocate(input_density(nbf, nbf))
+do i = 1, nbf
+    do j = 1, nbf
         input_density(i,j) = input_args%density(i,j)
     end do
 end do
+
+bigexp = input_args%bigexp ! threshold for old/new algorithm
 
 !! Done input
 

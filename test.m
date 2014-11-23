@@ -7,8 +7,13 @@ molstr = ['O 1.33208109 2.5992915701 -0.0190596757', char(10), ...
 basisname = 'sto-3g';
 
 m1 = MatPsi(molstr, basisname);
+m1.RHF();
+psi4_occOrb = m1.RHF_C();
+psi4_occOrb = psi4_occOrb(:, 1:m1.nelec()/2);
 
 mg1 = MatGDMA(m1);
+
+mg1.RunGDMA(psi4_occOrb);
 
 mg1.multipoles(1:10, 1:4)
 
