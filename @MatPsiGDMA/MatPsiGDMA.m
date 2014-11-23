@@ -1,33 +1,33 @@
-classdef MatGDMA < handle
+classdef MatPsiGDMA < handle
     
     % Note for dimension check:
     % We "implicitly" use "limit", "shellNfuncs", and "shellNprims" to
     % determine some dimension of our vectors or matrices; this may result
     % in that if these 3 properties had some wrong dimension, the program
-    % would rather complain about other properties, but not these.
+    % would rather complain about other properties, but not them.
     
     properties (SetAccess = private)
         
         %! input section
         % sites info
-        nucleiCharges
-        xyzSites
-        limit % each entry is the maximum order of multipoles of each site
+        nucleiCharges    % nuclei charges of sites; 0 for non-atom sites
+        xyzSites         % cartesian coordinates of sites
+        limit            % maximum order of multipoles of sites
         
         % shell info
-        shellNfuncs
-        shell2atom
-        shellNprims
+        shellNfuncs     % how many basis functions each site has
+        shell2atom      % on which atom each site locates
+        shellNprims     % how many primitive gaussians each site has
         
         % gaussian primitive info
-        primExps
-        primCoefs
+        primExps        % exponentials of primitive gaussians
+        primCoefs       % contraction coefficients of primtive gaussians
         
         % density matrix
         density
         
         % algorithm threshold
-        bigexp
+        bigexp          % if primExps(i) > bigexp then use old algorithm
         
         %! output
         % GDMA output
@@ -40,14 +40,6 @@ classdef MatGDMA < handle
         default_limit;
         default_bigexp;
         
-        density_format = 'Psi4';
-        
-        % Psi4 interface
-        psi4_occOrb
-        
-        % Gaussian interface
-        gaussian_density
-        
     end
     
     properties (Access = private)
@@ -58,7 +50,7 @@ classdef MatGDMA < handle
     
     methods
         
-        function obj = MatGDMA(matpsi)
+        function obj = MatPsiGDMA(matpsi)
             obj.shellNprims = matpsi.shellNprims();
             obj.shell2atom = matpsi.shell2center();
             obj.shellNfuncs = matpsi.shellNfuncs();
@@ -79,7 +71,7 @@ classdef MatGDMA < handle
             
         end
         
-        function multipoles_ = RunGDMA(obj, bigexp, limit)
+        function multipoles_ = RunGDMA(obj, occOrb, bigexp, limit)
             if(nargin < 3)
                 bigexp = obj.default_bigexp;
             end
@@ -93,11 +85,7 @@ classdef MatGDMA < handle
             obj.bigexp = bigexp;
             
             % GDMA wants a Gaussian style density matrix
-            if(strcmpi(obj.density_format, 'Psi4') || strcmpi(obj.density_format, 'MatPsi'))
-                obj.density = obj.Psi4OccOrb2GaussianDensity(obj.psi4_occOrb);
-            elseif(strcmpi(obj.density_format, 'Gaussian'))
-                obj.density = obj.gaussian_density;
-            end
+            obj.density = obj.Psi4OccOrb2GaussianDensity(occOrb);
             
             % turn off warning
             warning('off', 'MATLAB:structOnObject')
