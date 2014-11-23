@@ -82,14 +82,27 @@ end
 
 function InputScalar(structPtr, fieldName)
 
+    interface
+        
+        function ReadField(structPtr, fieldName)
+            real*8, allocatable :: ReadField(:, :)
+            mwPointer, intent(in) :: structPtr
+            character*(*), intent(in) :: fieldName
+        end function ReadField
+        
+    end interface
+
     mwPointer structPtr
     character*(*) fieldname
     real*8 InputScalar
+    real*8, allocatable :: tempMatrix(:, :)
     
-    mwPointer mxGetPr
-    mwPointer mxGetField
+    tempMatrix = ReadField(structPtr, fieldName)
     
-    call mxCopyPtrToReal8(mxGetPr(mxGetField(structPtr, 1, fieldName)), InputScalar, 1)
+    call DimensionCheck(fieldName, size(tempMatrix, 1), 1)
+    call DimensionCheck(fieldName, size(tempMatrix, 2), 1)
+    
+    InputScalar = tempMatrix(1,1)
 
 end function InputScalar
 
