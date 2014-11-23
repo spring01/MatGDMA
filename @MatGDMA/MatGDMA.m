@@ -42,6 +42,12 @@ classdef MatGDMA < handle
         
         density_format = 'Psi4';
         
+        % Psi4 interface
+        psi4_occOrb
+        
+        % Gaussian interface
+        gaussian_density
+        
     end
     
     properties (Access = private)
@@ -73,7 +79,7 @@ classdef MatGDMA < handle
             
         end
         
-        function multipoles_ = RunGDMA(obj, occOrb, bigexp, limit)
+        function multipoles_ = RunGDMA(obj, bigexp, limit)
             if(nargin < 3)
                 bigexp = obj.default_bigexp;
             end
@@ -88,13 +94,15 @@ classdef MatGDMA < handle
             
             % GDMA wants a Gaussian style density matrix
             if(strcmpi(obj.density_format, 'Psi4') || strcmpi(obj.density_format, 'MatPsi'))
-                obj.density = obj.Psi4OccOrb2GaussianDensity(occOrb);
+                obj.density = obj.Psi4OccOrb2GaussianDensity(obj.psi4_occOrb);
+            elseif(strcmpi(obj.density_format, 'Gaussian'))
+                obj.density = obj.gaussian_density;
             end
             
             % turn off warning
             warning('off', 'MATLAB:structOnObject')
             
-            %!!! GDMA driver !!!
+            %!!! GDMA DRIVER MEX !!!
             multipoles_ = matgdma_mex(struct(obj));
             
             % output
