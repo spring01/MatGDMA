@@ -193,6 +193,10 @@ function ReadField(structPtr, fieldName)
     
     allocate(ReadField(size_m, size_n))
     call mxCopyPtrToReal8(mxGetPr(tempMwPointer), ReadField, size_m * size_n)
+    
+    if(isnan(sum(ReadField))) then
+        call mexErrMsgIdAndTxt("ReadField:structPtr", "Field "//fieldName//" has NaN in it.")
+    end if
 
 end function ReadField
 
