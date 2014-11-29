@@ -32,3 +32,8 @@
 
 # MatPsi
 @MatPsi
+
+# Matlab temporary file
+*.m~
+
+
