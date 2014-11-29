@@ -61,14 +61,18 @@ classdef MatPsiGDMA < handle
             obj.psi4_sphericalAM = matpsi.basis_has_puream();
             
             % default limit is 4 for non-H and 1 for H
-            heavyOrNot = (obj.nucleiCharges~=1);
-            obj.limit = zeros(size(heavyOrNot));
-            obj.limit(heavyOrNot==1) = 4;
-            obj.limit(heavyOrNot==0) = 1;
+            obj.SetLimitHeavyHydrogen(4, 1);
             
             % default algorithm threshold is 0 (always use old algorithm)
             obj.bigexp = 0.0;
             
+        end
+        
+        function SetLimitHeavyHydrogen(obj, heavyLimit, hydrogenLimit)
+            heavyOrNot = (obj.nucleiCharges~=1);
+            obj.limit = zeros(size(heavyOrNot));
+            obj.limit(heavyOrNot==1) = heavyLimit;
+            obj.limit(heavyOrNot==0) = hydrogenLimit;
         end
         
         function multipoles_ = RunGDMA(obj, occOrb)
@@ -77,7 +81,7 @@ classdef MatPsiGDMA < handle
             obj.density = obj.Psi4OccOrb2GaussianDensity(occOrb);
             
             %!!! GDMA DRIVER MEX !!!
-            multipoles_ = MatPsiGDMA.matgdma_mex(obj.InputStruct());
+            multipoles_ = MatPsiGDMA.matgdma_mex(obj);
             
             % output
             multipoles_ = multipoles_(2:end, 1:length(obj.limit));
@@ -92,23 +96,6 @@ classdef MatPsiGDMA < handle
         % Convert a Psi4 style occupied molecular orbital matrix to 
         % a Gaussian style density matrix
         density = Psi4OccOrb2GaussianDensity(obj, psi4_occOrb);
-        
-    end
-    
-    methods (Access = private)
-        
-        function struct = InputStruct(obj)
-            struct.nucleiCharges = obj.nucleiCharges;
-            struct.xyzSites = obj.xyzSites;
-            struct.shellNfuncs = obj.shellNfuncs;
-            struct.shell2atom = obj.shell2atom;
-            struct.shellNprims = obj.shellNprims;
-            struct.primExps = obj.primExps;
-            struct.primCoefs = obj.primCoefs;
-            struct.density = obj.density;
-            struct.limit = obj.limit;
-            struct.bigexp = obj.bigexp;
-        end
         
     end
     

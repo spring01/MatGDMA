@@ -15,7 +15,11 @@ m1.RHF();
 psi4_occOrb = m1.RHF_C();
 psi4_occOrb = psi4_occOrb(:, 1:m1.nelec()/2);
 
+tic
+for i = 1:1000
 mg1.RunGDMA(psi4_occOrb);
+end
+toc
 
 % mg1.multipoles(1:10, 1:4)
 
