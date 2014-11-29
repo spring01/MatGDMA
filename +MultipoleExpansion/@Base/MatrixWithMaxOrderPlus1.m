@@ -1,4 +1,4 @@
-function res = MatrixWithMaxOrder(obj, vecAB, maxOrderPlus1)
+function res = MatrixWithMaxOrderPlus1(obj, vecAB, maxOrderPlus1)
 switch(maxOrderPlus1)
     case(1)
         res = obj.BlockWithMaxOrder0(vecAB);

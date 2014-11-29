@@ -25,7 +25,7 @@ classdef (Abstract) Base < handle
         function matrix = InteractionMatrixWith(multiExpA, multiExpB)
             xyzA2B = multiExpB.xyz - multiExpA.xyz; % vector A to B
             
-            matrix = multiExpA.MatrixWithMaxOrder( ...
+            matrix = multiExpA.MatrixWithMaxOrderPlus1( ...
                 xyzA2B([3 2 1]) ./ norm(xyzA2B), ... % use normalized zyx
                 multiExpB.MaxOrderPlus1());
             
@@ -77,7 +77,7 @@ classdef (Abstract) Base < handle
             maxOrderPlus1 = sqrt(length(obj.coeffs));
         end
         
-        res = MatrixWithMaxOrder(obj, vecAB, maxOrderPlus1);
+        res = MatrixWithMaxOrderPlus1(obj, vecAB, maxOrderPlus1);
         
     end
     
