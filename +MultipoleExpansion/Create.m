@@ -13,5 +13,5 @@ switch(matpsiGDMA.limit(iSite))
     otherwise
         throw(MException('MultipoleExpansion:Create', 'Order not implemented yet.'));
 end
-multipoleExpansion.InitializeWithGDMA(matpsiGDMA, iSite);
+multipoleExpansion.InitializeFromGDMA(matpsiGDMA, iSite);
 end

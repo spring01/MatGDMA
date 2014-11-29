@@ -25,6 +25,6 @@ switch(maxOrderPlus1)
             obj.BlockWithMaxOrder3(vecAB), ...
             obj.BlockWithMaxOrder4(vecAB)];
     otherwise
-        throw(MException('Base:MatrixWithMaxOrder', 'Order not implemented yet.'));
+        throw(MException('Base:MatrixWithMaxOrderPlus1', 'Order not implemented yet.'));
 end
 end

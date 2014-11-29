@@ -9,7 +9,7 @@ classdef (Abstract) Base < handle
     
     methods
         
-        function obj = InitializeWithGDMA(obj, matpsiGDMA, iSite)
+        function obj = InitializeFromGDMA(obj, matpsiGDMA, iSite)
             obj.xyz = matpsiGDMA.xyzSites(:, iSite);
             obj.coeffs = ...
                 matpsiGDMA.multipoles(1:(matpsiGDMA.limit(iSite)+1)^2, iSite);
