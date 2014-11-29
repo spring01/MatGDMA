@@ -76,11 +76,8 @@ classdef MatPsiGDMA < handle
             % GDMA wants a Gaussian style density matrix
             obj.density = obj.Psi4OccOrb2GaussianDensity(occOrb);
             
-            % turn off warning
-            warning('off', 'MATLAB:structOnObject')
-            
             %!!! GDMA DRIVER MEX !!!
-            multipoles_ = matgdma_mex(struct(obj));
+            multipoles_ = MatPsiGDMA.matgdma_mex(obj.InputStruct());
             
             % output
             multipoles_ = multipoles_(2:end, 1:length(obj.limit));
@@ -95,6 +92,30 @@ classdef MatPsiGDMA < handle
         % Convert a Psi4 style occupied molecular orbital matrix to 
         % a Gaussian style density matrix
         density = Psi4OccOrb2GaussianDensity(obj, psi4_occOrb);
+        
+    end
+    
+    methods (Access = private)
+        
+        function struct = InputStruct(obj)
+            struct.nucleiCharges = obj.nucleiCharges;
+            struct.xyzSites = obj.xyzSites;
+            struct.shellNfuncs = obj.shellNfuncs;
+            struct.shell2atom = obj.shell2atom;
+            struct.shellNprims = obj.shellNprims;
+            struct.primExps = obj.primExps;
+            struct.primCoefs = obj.primCoefs;
+            struct.density = obj.density;
+            struct.limit = obj.limit;
+            struct.bigexp = obj.bigexp;
+        end
+        
+    end
+    
+    methods (Static, Access = private)
+        
+        % mex claimed as a static mathod (to wrap it under @folder)
+        multipoles = matgdma_mex(struct);
         
     end
     

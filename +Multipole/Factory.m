@@ -2,7 +2,7 @@ classdef Factory < handle
     
     methods (Static)
         
-        function multipole = Create(order)
+        function multipole = CreateOrder(order)
             switch(order)
                 case(0)
                     multipole = Multipole.Order0();
@@ -15,7 +15,7 @@ classdef Factory < handle
                 case(4)
                     multipole = Multipole.Order4();
                 otherwise
-                    throw(MException('Factory:Create', 'order not implemented yet.'));
+                    throw(MException('Factory:CreateOrder', 'Order not implemented yet.'));
             end
         end
         
