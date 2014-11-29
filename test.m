@@ -8,7 +8,7 @@ basisname = 'sto-3g';
 
 m1 = MatPsi(molstr, basisname);
 mg1 = MatPsiGDMA(m1);
-mg1.limit = [4 4 4 4];
+mg1.limit = [4 4 4 2];
 % mg1.bigexp = inf;
 
 m1.RHF();
@@ -21,18 +21,13 @@ mg1.RunGDMA(psi4_occOrb);
 end
 toc
 
-% mg1.multipoles(1:10, 1:4)
+mg1.multipoles(1:10, 1:4)
 
-mexp1 = Multipole.Expansion(mg1, 1);
-mexp2 = Multipole.Expansion(mg1, 4);
+mexp1 = MultipoleExpansion.Create(mg1, 1);
+mexp2 = MultipoleExpansion.Create(mg1, 4);
 
-% mexp1.xyz = mexp1.xyz([3 1 2]);
-% mexp2.xyz = mexp2.xyz([3 1 2]);
+mat1 = mexp1.InteractionMatrixWith(mexp2);
+mat2 = mexp2.InteractionMatrixWith(mexp1);
 
-mat1 = mexp1.InteractionWith(mexp2);
-
-mexp1.coeffs' * mat1 * mexp2.coeffs
-
-mat2 = mexp2.InteractionWith(mexp1);
-
-mexp2.coeffs' * mat2 * mexp1.coeffs
+mexp1.InteractionWith(mexp2)
+mexp2.InteractionWith(mexp1)

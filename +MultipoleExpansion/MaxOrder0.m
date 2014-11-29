@@ -1,24 +1,24 @@
-classdef Order0 < Multipole.Base
+classdef MaxOrder0 < MultipoleExpansion.Base
     
     methods (Access = protected)
         
-        function res = With0(obj, vecAB)
+        function res = BlockWithMaxOrder0(obj, vecAB)
             res = obj.Block00(vecAB);
         end
         
-        function res = With1(obj, vecAB)
+        function res = BlockWithMaxOrder1(obj, vecAB)
             res = obj.Block10(-vecAB)';
         end
         
-        function res = With2(obj, vecAB)
+        function res = BlockWithMaxOrder2(obj, vecAB)
             res = obj.Block20(-vecAB)';
         end
         
-        function res = With3(obj, vecAB)
+        function res = BlockWithMaxOrder3(obj, vecAB)
             res = obj.Block30(-vecAB)';
         end
         
-        function res = With4(obj, vecAB)
+        function res = BlockWithMaxOrder4(obj, vecAB)
             res = obj.Block40(-vecAB)';
         end
         
