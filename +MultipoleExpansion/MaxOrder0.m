@@ -22,6 +22,10 @@ classdef MaxOrder0 < MultipoleExpansion.Base
             res = obj.Block40(-vecAB)';
         end
         
+        function res = BlockWithMaxOrder5(obj, vecAB)
+            res = obj.Block50(-vecAB)';
+        end
+        
     end
     
 end

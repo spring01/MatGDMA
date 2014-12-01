@@ -10,6 +10,8 @@ switch(matpsiGDMA.limit(iSite))
         multipoleExpansion = MultipoleExpansion.MaxOrder3();
     case(4)
         multipoleExpansion = MultipoleExpansion.MaxOrder4();
+    case(5)
+        multipoleExpansion = MultipoleExpansion.MaxOrder5();
     otherwise
         throw(MException('MultipoleExpansion:Create', 'Order not implemented yet.'));
 end

@@ -58,6 +58,12 @@ classdef (Abstract) Base < handle
         res = Block42(~, vecZYX);
         res = Block43(~, vecZYX);
         res = Block44(~, vecZYX);
+        res = Block50(~, vecZYX);
+        res = Block51(~, vecZYX);
+        res = Block52(~, vecZYX);
+        res = Block53(~, vecZYX);
+        res = Block54(~, vecZYX);
+        res = Block55(~, vecZYX);
         
     end
     
@@ -68,6 +74,7 @@ classdef (Abstract) Base < handle
         res = BlockWithMaxOrder2(obj, vecAB);
         res = BlockWithMaxOrder3(obj, vecAB);
         res = BlockWithMaxOrder4(obj, vecAB);
+        res = BlockWithMaxOrder5(obj, vecAB);
         
     end
     
