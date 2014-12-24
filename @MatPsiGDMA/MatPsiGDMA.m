@@ -49,16 +49,16 @@ classdef MatPsiGDMA < handle
     
     methods
         
-        function obj = MatPsiGDMA(matpsi)
-            obj.shellNprims = matpsi.shellNprims();
-            obj.shell2atom = matpsi.shell2center();
-            obj.shellNfuncs = matpsi.shellNfuncs();
-            obj.nucleiCharges = matpsi.Zlist();
-            obj.xyzSites = matpsi.geom()'; % xyzSites in Bohr
-            obj.primExps = matpsi.primExps();
-            obj.primCoefs = matpsi.primCoefs(); % un-normalized
+        function obj = MatPsiGDMA(matpsi2)
+            obj.shellNprims = matpsi2.BasisSet_ShellNumPrimitives();
+            obj.shell2atom = matpsi2.BasisSet_ShellToCenter();
+            obj.shellNfuncs = matpsi2.BasisSet_ShellNumFunctions();
+            obj.nucleiCharges = matpsi2.Molecule_AtomicNumbers();
+            obj.xyzSites = matpsi2.Molecule_Geometry()'; % xyzSites in Bohr
+            obj.primExps = matpsi2.BasisSet_PrimitiveExponents();
+            obj.primCoefs = matpsi2.BasisSet_PrimitiveCoefficients(); % un-normalized
             
-            obj.psi4_sphericalAM = matpsi.basis_has_puream();
+            obj.psi4_sphericalAM = matpsi2.BasisSet_IsSpherical();
             
             % default limit is 4 for non-H and 1 for H
             obj.SetLimitHeavyHydrogen(4, 1);
@@ -86,6 +86,18 @@ classdef MatPsiGDMA < handle
             % output
             multipoles_ = multipoles_(2:end, 1:length(obj.limit));
             obj.multipoles = multipoles_;
+        end
+        
+        function RemoveCore(obj)
+            coreChargeList = zeros(1, length(obj.nucleiCharges));
+            coreChargeList(:) = obj.nucleiCharges; % to make sure that it's a row
+            obj.multipoles(1, :) = obj.multipoles(1, :) - coreChargeList;
+        end
+        
+        function AddCoreBack(obj)
+            coreChargeList = zeros(1, length(obj.nucleiCharges));
+            coreChargeList(:) = obj.nucleiCharges; % to make sure that it's a row
+            obj.multipoles(1, :) = obj.multipoles(1, :) + coreChargeList;
         end
         
         function res = NthOrderMthSite(obj, nthOrder, mthSite)
