@@ -2,7 +2,7 @@ classdef MatPsiGDMA < handle
     
     % Note for dimension check:
     % We "implicitly" use "limit", "shellNfuncs", and "shellNprims" to
-    % determine some dimension of our vectors or matrices; this may result
+    % determine the dimension of other vectors and matrices; this may result
     % in that if these 3 properties had some wrong dimension, the program
     % would rather complain about other properties, but not them.
     
@@ -55,8 +55,8 @@ classdef MatPsiGDMA < handle
             obj.shellNfuncs = matpsi2.BasisSet_ShellNumFunctions();
             obj.nucleiCharges = matpsi2.Molecule_AtomicNumbers();
             obj.xyzSites = matpsi2.Molecule_Geometry()'; % xyzSites in Bohr
-            obj.primExps = matpsi2.BasisSet_PrimitiveExponents();
-            obj.primCoefs = matpsi2.BasisSet_PrimitiveCoefficients(); % un-normalized
+            obj.primExps = matpsi2.BasisSet_PrimExp();
+            obj.primCoefs = matpsi2.BasisSet_PrimCoeffUnnorm(); % un-normalized
             
             obj.psi4_sphericalAM = matpsi2.BasisSet_IsSpherical();
             
