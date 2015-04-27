@@ -404,6 +404,22 @@ call dma_main(dtri,kp)
 
 q_out = q
 
+deallocate(zan)
+deallocate(c)
+deallocate(user_given_limit)
+deallocate(kng)
+deallocate(katom)
+deallocate(shell_nfuncs)
+deallocate(shell_type)
+deallocate(ex)
+deallocate(primCoefs)
+deallocate(input_density)
+deallocate(kstart, ktype, kloc, kmin, kmax)
+deallocate(cs, cp)
+deallocate(iax)
+deallocate(densty, temp)
+deallocate(dtri)
+
 END SUBROUTINE gdma_driver_routine
 
 END MODULE gdma_driver

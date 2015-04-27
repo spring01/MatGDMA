@@ -65,6 +65,16 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
     size_n = size(multipoles, 2)
     plhs(1) = mxCreateDoubleMatrix(size_m, size_n, 0)
     call mxCopyReal8ToPtr(multipoles, mxGetPr(plhs(1)), size_m*size_n)
+    deallocate(input_args%limit)
+    deallocate(input_args%nucleiCharges)
+    deallocate(input_args%xyzSites)
+    deallocate(input_args%shellNfuncs)
+    deallocate(input_args%shellNprims)
+    deallocate(input_args%shell2atom)
+    deallocate(input_args%primExps)
+    deallocate(input_args%primCoefs)
+    deallocate(input_args%density)
+    deallocate(multipoles)
 end subroutine mexFunction
 
 
