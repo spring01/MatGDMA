@@ -28,11 +28,20 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
     
     mwPointer mxGetPr
     mwPointer mxCreateDoubleMatrix
-    type(gdma_input) input_args
-    real(kind(1d0)), dimension(:,:), allocatable :: multipoles
     
+    mwSize ndim
+    mwSize dims(3)
+    integer*4 classid
+    integer*4 mxClassIDFromClassName
+    mwPointer mxCreateNumericArray
+    
+    type(gdma_input) input_args
+    
+    real(kind(1d0)), dimension(:,:), allocatable :: multipoles
     integer numSites, numShells, numBasisFunc, numPrims
     mwPointer size_m, size_n
+    
+    real(kind(1d0)), dimension(:,:), allocatable :: pos_xyz, not_moved_multipoles
     
     if(nrhs .ne. 1) & 
         call mexErrMsgIdAndTxt("mexFunction:nrhs", "Expect only 1 input.")
@@ -59,12 +68,23 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
     
     input_args%bigexp = Scalar(ReadField(prhs(1), 'bigexp', 1, 1))
     
-    call gdma_driver_routine(multipoles, input_args)
+    call gdma_driver_routine(multipoles, pos_xyz, not_moved_multipoles, input_args)
     
     size_m = size(multipoles, 1)
     size_n = size(multipoles, 2)
     plhs(1) = mxCreateDoubleMatrix(size_m, size_n, 0)
     call mxCopyReal8ToPtr(multipoles, mxGetPr(plhs(1)), size_m*size_n)
+    
+    size_m = size(pos_xyz, 1)
+    size_n = size(pos_xyz, 2)
+    plhs(2) = mxCreateDoubleMatrix(size_m, size_n, 0)
+    call mxCopyReal8ToPtr(pos_xyz, mxGetPr(plhs(2)), size_m*size_n)
+    
+    size_m = size(not_moved_multipoles, 1)
+    size_n = size(not_moved_multipoles, 2)
+    plhs(3) = mxCreateDoubleMatrix(size_m, size_n, 0)
+    call mxCopyReal8ToPtr(not_moved_multipoles, mxGetPr(plhs(3)), size_m*size_n)
+    
     deallocate(input_args%limit)
     deallocate(input_args%nucleiCharges)
     deallocate(input_args%xyzSites)
@@ -75,6 +95,8 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
     deallocate(input_args%primCoefs)
     deallocate(input_args%density)
     deallocate(multipoles)
+    deallocate(pos_xyz)
+    deallocate(not_moved_multipoles)
 end subroutine mexFunction
 
 

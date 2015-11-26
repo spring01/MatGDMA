@@ -1,7 +1,7 @@
 MEX    := /home/haichen/program/bin/MATLAB/R2013a/bin/mex
 
 FFLAGS := -O2 -fpic
-FC     := gfortran
+FC     := gfortran-4.8
 
 build: gdma_driver.o dma.o atom_grids.o input.o timing.o
 	${MEX} matgdma_mex.F90 $^

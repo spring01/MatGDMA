@@ -11,7 +11,7 @@ mg1 = MatPsiGDMA(mp);
 mg1.limit = [1 2 2 5];
 mg1.bigexp = inf;
 
-mp.SCF_RunRHF();
+mp.SCF_RunSCF();
 psi4_occOrb = mp.SCF_OrbitalAlpha();
 psi4_occOrb = psi4_occOrb(:, 1:mp.Molecule_NumElectrons()/2);
 

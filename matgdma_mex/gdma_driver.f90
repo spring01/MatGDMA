@@ -15,7 +15,7 @@ END TYPE
 
 CONTAINS
 
-SUBROUTINE gdma_driver_routine(q_out, input_args)
+SUBROUTINE gdma_driver_routine(q_out, mp_pos_out, mp_coeff_out, input_args)
 
 !  Distributed Multipole Analysis for Gaussian Wavefunctions
 !
@@ -80,6 +80,7 @@ type(gdma_input), intent(in) :: input_args
 
 ! output arguments
 real(dp), allocatable, intent(out) :: q_out(:,:)
+real(dp), allocatable, intent(out) :: mp_pos_out(:,:), mp_coeff_out(:,:)
 
 fchk=.false.
 first=.true.
@@ -403,6 +404,8 @@ first=.false.
 call dma_main(dtri,kp)
 
 q_out = q
+mp_pos_out = mp_pos
+mp_coeff_out = mp_coeff
 
 deallocate(zan)
 deallocate(c)

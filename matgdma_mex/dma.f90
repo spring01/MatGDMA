@@ -19,7 +19,6 @@ MODULE DMA
 !  the Free Software Foundation, Inc., 51 Franklin Street,
 !  Fifth Floor, Boston, MA 02110-1301, USA.
 
-
 USE atom_grids, ONLY : grid, ng, make_grid, Lebedev,                   &
     n_a, n_r, k_mu, start
 IMPLICIT NONE
@@ -28,7 +27,7 @@ PRIVATE
 PUBLIC dma_main, c, ex, cs, cp, iax, kmin, kmax, kstart, katom, ktype, &
     kng, kloc, maxcen, maxbfn, maxs, nat, name, nshell, title, &
     zan, Qfactor, echarge, bohr, rfact, punchfile, user_given_limit, &
-    lmax, q, bigexp
+    lmax, q, bigexp, mp_pos, mp_coeff
 
 INTEGER, PARAMETER :: dp=kind(1d0)
 
@@ -74,6 +73,8 @@ DATA IZ(36:56) /0,0,5,0,1,0,1,4,4,0,2,0,2,3,3,1,1,3,1,2,2/
 
 INTEGER, ALLOCATABLE :: limit(:), user_given_limit(:)
 REAL(dp), ALLOCATABLE :: xs(:,:), radius(:), q(:,:)
+INTEGER :: num_all_prim
+REAL(dp), ALLOCATABLE :: mp_pos(:,:), mp_coeff(:,:)
 REAL(dp) :: rt(0:20), binom(0:20,0:20), rtbinom(0:20,0:20),         &
     d(56,56)
 
@@ -490,6 +491,13 @@ end if
 
 if (allocated(limit)) deallocate(limit,xs,radius,q)
 allocate(limit(maxs),xs(3,maxs),radius(maxs),q(0:121,maxs),stat=ok)
+if (allocated(mp_coeff)) deallocate(mp_coeff)
+num_all_prim = size(ex)
+allocate(mp_coeff(121,num_all_prim*num_all_prim),stat=ok)
+mp_coeff(:,:) = 0d0
+if (allocated(mp_pos)) deallocate(mp_pos)
+allocate(mp_pos(3,num_all_prim*num_all_prim),stat=ok)
+mp_pos(:,:) = 0d0
 if (ok>0) call die("Can't allocate site arrays")
 
 !  ATOMS (default choice of sites)
@@ -1558,34 +1566,34 @@ do i=1,nat
 !           if (ieqj .and. ex(ig)+ex(jg) > bigexp) then
 !  Both primitives on the same atom, at least one with large exponent.
 !  Use original DMA algorithm.
-
+  
 !  Vectors A and B are the positions of atoms I and J relative to the
 !  centre P of the overlap distribution.
-            p=aj/aa
-            xa=p*xji
-            ya=p*yji
-            za=p*zji
-            xb=xa-xji
-            yb=ya-yji
-            zb=za-zji
-            xp=xi-xa
-            yp=yi-ya
-            zp=zi-za
-            t=dsqrt(1.0d0/aa)
-            if (iw .gt. 0) write (iw,"(3(i5,i4), 3x, 3f10.5)")      &
-                i,j, ii,jj, ig,jg, xp,yp,zp
+              p=aj/aa
+              xa=p*xji
+              ya=p*yji
+              za=p*zji
+              xb=xa-xji
+              yb=ya-yji
+              zb=za-zji
+              xp=xi-xa
+              yp=yi-ya
+              zp=zi-za
+              t=dsqrt(1.0d0/aa)
+              if (iw .gt. 0) write (iw,"(3(i5,i4), 3x, 3f10.5)")      &
+                  i,j, ii,jj, ig,jg, xp,yp,zp
 !  LQ is the maximum rank of multipole to which these functions
 !  contribute. The integrals involve polynomials up to order 2(NQ-1),
 !  for which NQ integration points are required.
-            lq=la+lb
-            nq=lq+1
-            k1=mink(nq)
-            k2=maxk(nq)
-            !  Clear integral arrays
-            gx=0.0d0
-            gy=0.0d0
-            gz=0.0d0
-
+              lq=la+lb
+              nq=lq+1
+              k1=mink(nq)
+              k2=maxk(nq)
+              !  Clear integral arrays
+              gx=0.0d0
+              gy=0.0d0
+              gz=0.0d0
+  
 !  The following loop runs through the integration points, accumulating
 !  in GX(LL1*L1*(IA-1)+L1*(IB-1)+IQ) the quantity
 !       sum(k) gk * (xk-xA)**(IA-1) * (xk-xB)**(IB-1) * xk**(IQ-1)
@@ -1593,73 +1601,82 @@ do i=1,nat
 !  LL1=2L+1, where L is the maximum angular momentum to be handled,
 !  i.e. 3 at present.
 !  Similar expressions for y and z integrals are formed in GY and GZ.
-            do k=k1,k2
-              s=h(k)*t
-              g=w(k)*t
-              xas=s-xa
-              yas=s-ya
-              zas=s-za
-              xbs=s-xb
-              ybs=s-yb
-              zbs=s-zb
-              ma=0
-              pax=g
-              pay=g
-              paz=g
-              do ia=0,la
-                mb=ma
-                px=pax
-                py=pay
-                pz=paz
-                do ib=0,lb
-                  pq=1.0d0
-                  do iq=1,nq
-                    gx(mb+iq)=gx(mb+iq)+px*pq
-                    gy(mb+iq)=gy(mb+iq)+py*pq
-                    gz(mb+iq)=gz(mb+iq)+pz*pq
-                    pq=pq*s
+              do k=k1,k2
+                s=h(k)*t
+                g=w(k)*t
+                xas=s-xa
+                yas=s-ya
+                zas=s-za
+                xbs=s-xb
+                ybs=s-yb
+                zbs=s-zb
+                ma=0
+                pax=g
+                pay=g
+                paz=g
+                do ia=0,la
+                  mb=ma
+                  px=pax
+                  py=pay
+                  pz=paz
+                  do ib=0,lb
+                    pq=1.0d0
+                    do iq=1,nq
+                      gx(mb+iq)=gx(mb+iq)+px*pq
+                      gy(mb+iq)=gy(mb+iq)+py*pq
+                      gz(mb+iq)=gz(mb+iq)+pz*pq
+                      pq=pq*s
+                    end do
+                    mb=mb+ll1
+                    px=px*xbs
+                    py=py*ybs
+                    pz=pz*zbs
                   end do
-                  mb=mb+ll1
-                  px=px*xbs
-                  py=py*ybs
-                  pz=pz*zbs
+                  ma=ma+l1*ll1
+                  pax=pax*xas
+                  pay=pay*yas
+                  paz=paz*zas
                 end do
-                ma=ma+l1*ll1
-                pax=pax*xas
-                pay=pay*yas
-                paz=paz*zas
               end do
-            end do
 !  Now these basic integrals are used to construct the multipole moments
 !  for the overlap density corresponding to each pair of basis functions
 !  in the pair of shells.
-            qt=0.0d0
-            ci=cs(ig)
-            
-            do ia=mini,maxi
-              if (ia .gt. 1 .and. la .eq. 1) ci=cp(ig)
-              ! if (ia .gt. 4) ci=cd(ig)
-              cj=cs(jg)
-              do jb=minj,maxj
-                if (jb .gt. 1 .and. lb .eq. 1) cj=cp(jg)
-                ! if (jb .gt. 4) cj=cd(jg)
-                f=-fac*ci*cj*d(ia,jb)
-                mx=(ix(ia)*l1+ix(jb))*ll1+1
-                my=(iy(ia)*l1+iy(jb))*ll1+1
-                mz=(iz(ia)*l1+iz(jb))*ll1+1
+              qt=0.0d0
+              ci=cs(ig)
+              
+              do ia=mini,maxi
+                if (ia .gt. 1 .and. la .eq. 1) ci=cp(ig)
+                ! if (ia .gt. 4) ci=cd(ig)
+                cj=cs(jg)
+                do jb=minj,maxj
+                  if (jb .gt. 1 .and. lb .eq. 1) cj=cp(jg)
+                  ! if (jb .gt. 4) cj=cd(jg)
+                  f=-fac*ci*cj*d(ia,jb)
+                  mx=(ix(ia)*l1+ix(jb))*ll1+1
+                  my=(iy(ia)*l1+iy(jb))*ll1+1
+                  mz=(iz(ia)*l1+iz(jb))*ll1+1
 !  Now the integral of (x**i)*(y**j)*(z**k) over the current pair of
 !  atomic primitive orbitals is F*GX(MX+i)*GY(MY+j)*GZ(MZ+k).
-                call addqlm(lq, f, gx(mx:),gy(my:),gz(mz:))
+                  call addqlm(lq, f, gx(mx:),gy(my:),gz(mz:))
+                  
 !  End of loop over basis functions
+                end do
               end do
-            end do
-
-            if (iw .gt. 0) write (iw,1003) qt(1:nq**2)
-1003        format (f10.6: / 3f10.6: / 5f10.6: / 7f10.6: / 9f10.6: /   &
-                11f10.6: / 13f10.6: / 15f10.6: / 17f10.6: / 19f10.6: / &
-                21f10.6)
+  
+              if (iw .gt. 0) write (iw,1003) qt(1:nq**2)
+1003          format (f10.6: / 3f10.6: / 5f10.6: / 7f10.6: / 9f10.6: /   &
+                  11f10.6: / 13f10.6: / 15f10.6: / 17f10.6: / 19f10.6: / &
+                  21f10.6)
+              
+              mp_pos(1, (ig-1)*num_all_prim + jg) = xp
+              mp_pos(2, (ig-1)*num_all_prim + jg) = yp
+              mp_pos(3, (ig-1)*num_all_prim + jg) = zp
+              
+              mp_coeff(:, (ig-1)*num_all_prim + jg) = qt(:)
+              
+              
 !  Move multipoles to expansion centre nearest to overlap centre P.
-            call moveq(xp,yp,zp)
+              call moveq(xp,yp,zp)
 
             else
 !  General case. Use integration over grid to assign multipole moments
