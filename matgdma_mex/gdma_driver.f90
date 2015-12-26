@@ -92,25 +92,17 @@ nat = size(input_args%limit)
 ! Deep copy zan = input_args%nucleiCharges
 if(allocated(zan)) deallocate(zan)
 allocate(zan(nat))
-do i = 1, size(input_args%nucleiCharges)
-    zan(i) = input_args%nucleiCharges(i)
-end do
+zan(:) = input_args%nucleiCharges(:)
 
 ! Deep copy c = input_args%xyzSites ; cartesian coordinates of sites
 if(allocated(c)) deallocate(c)
 allocate(c(3, nat))
-do i = 1, size(input_args%xyzSites, 1)
-    do j = 1, size(input_args%xyzSites, 2)
-        c(i,j) = input_args%xyzSites(i,j)
-    end do
-end do
+c(:, :) = input_args%xyzSites(:, :)
 
 ! Deep copy user_given_limit = input_args%limit ; maximum output multipole order
 if(allocated(user_given_limit)) deallocate(user_given_limit)
 allocate(user_given_limit(nat))
-do i = 1, size(input_args%limit)
-    user_given_limit(i) = input_args%limit(i)
-end do
+user_given_limit(:) = input_args%limit(:)
 
 !~ ich = XXX ! total charge
 !~ mul = XXX ! total multiplicity; I guess they just affect output print
@@ -119,24 +111,18 @@ nshell = size(input_args%shellNfuncs)
 ! Deep copy kng = input_args%shellNprims
 if(allocated(kng)) deallocate(kng)
 allocate(kng(nshell))
-do i = 1, nshell
-    kng(i) = input_args%shellNprims(i)
-end do
+kng(:) = input_args%shellNprims(:)
 
 ! Deep copy katom = input_args%shell2atom
 if(allocated(katom)) deallocate(katom)
 allocate(katom(nshell+1))
 katom = 0
-do i = 1, nshell
-    katom(i) = input_args%shell2atom(i)
-end do
+katom(:) = input_args%shell2atom(:)
 
 ! Deep copy shell_nfuncs = input_args%shellNfuncs
 if(allocated(shell_nfuncs)) deallocate(shell_nfuncs)
 allocate(shell_nfuncs(nshell))
-do i = 1, nshell
-    shell_nfuncs(i) = input_args%shellNfuncs(i)
-end do
+shell_nfuncs(:) = input_args%shellNfuncs(:)
 
 ! Determine shell_type according to shell_nfuncs
 if(allocated(shell_type)) deallocate(shell_type)
@@ -162,26 +148,18 @@ nprim = sum(input_args%shellNprims)
 ! Deep copy ex = input_args%primExps
 if(allocated(ex)) deallocate(ex)
 allocate(ex(nprim))
-do i = 1, nprim
-    ex(i) = input_args%primExps(i)
-end do
+ex(:) = input_args%primExps(:)
 
 ! Deep copy primCoefs = input_args%primCoefs
 if(allocated(primCoefs)) deallocate(primCoefs)
 allocate(primCoefs(nprim))
-do i = 1, nprim
-    primCoefs(i) = input_args%primCoefs(i)
-end do
+primCoefs(:) = input_args%primCoefs(:)
 
 nbf = sum(shell_nfuncs)
 ! Deep copy input_density = input_args%density
 if(allocated(input_density)) deallocate(input_density)
 allocate(input_density(nbf, nbf))
-do i = 1, nbf
-    do j = 1, nbf
-        input_density(i,j) = input_args%density(i,j)
-    end do
-end do
+input_density(:, :) = input_args%density(:, :)
 
 bigexp = input_args%bigexp ! threshold for old/new algorithm
 
