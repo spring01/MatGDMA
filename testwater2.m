@@ -25,7 +25,7 @@ gdma.SetLimitHeavyHydrogen(5, 5);
 orb = mp.SCF_OrbitalAlpha;
 occOrb = orb(:, 1:mp.Molecule_NumElectrons()/2);
 gdma.RunGDMA(occOrb);
-gdma.RemoveCore;
+gdma.RemoveCores();
 for i = 1:length(gdma.limit)
     sites{i} = MultipoleExpansion.Create(gdma, i);
 end

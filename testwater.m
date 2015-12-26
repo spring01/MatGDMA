@@ -13,11 +13,17 @@ orb = mp.SCF_OrbitalAlpha();
 occOrb = orb(:, 1:mp.Molecule_NumElectrons()/2);
 
 gdma.RunGDMA(occOrb);
-% gdma.RemoveCore();
+gdma.RemoveCores();
 
-moved = zeros(121, 3, 225);
-for i = 1:225
-    moved(:, :, i) = reshape(gdma.mp_coeff_moved(:, i), 121, []);
+
+
+numPrims = sum(gdma.shellNprims);
+sum_mp = zeros(size(gdma.pairs{1, 1}.moved));
+for i = 1:numPrims
+    for j = 1:numPrims
+        sum_mp = sum_mp + gdma.pairs{i, j}.moved;
+    end
 end
 
+[sum_mp(1:40, :), gdma.multipoles(1:40, :)] % should match
 
