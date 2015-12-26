@@ -41,7 +41,7 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
     integer numSites, numShells, numBasisFunc, numPrims
     mwPointer size_m, size_n
     
-    real(kind(1d0)), dimension(:,:), allocatable :: pos_xyz, not_moved_multipoles
+    real(kind(1d0)), dimension(:,:), allocatable :: pos_xyz, not_moved_multipoles, moved_multipoles
     
     if(nrhs .ne. 1) & 
         call mexErrMsgIdAndTxt("mexFunction:nrhs", "Expect only 1 input.")
@@ -68,7 +68,7 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
     
     input_args%bigexp = Scalar(ReadField(prhs(1), 'bigexp', 1, 1))
     
-    call gdma_driver_routine(multipoles, pos_xyz, not_moved_multipoles, input_args)
+    call gdma_driver_routine(multipoles, pos_xyz, not_moved_multipoles, moved_multipoles, input_args)
     
     size_m = size(multipoles, 1)
     size_n = size(multipoles, 2)
@@ -85,6 +85,11 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
     plhs(3) = mxCreateDoubleMatrix(size_m, size_n, 0)
     call mxCopyReal8ToPtr(not_moved_multipoles, mxGetPr(plhs(3)), size_m*size_n)
     
+    size_m = size(moved_multipoles, 1)
+    size_n = size(moved_multipoles, 2)
+    plhs(4) = mxCreateDoubleMatrix(size_m, size_n, 0)
+    call mxCopyReal8ToPtr(moved_multipoles, mxGetPr(plhs(4)), size_m*size_n)
+    
     deallocate(input_args%limit)
     deallocate(input_args%nucleiCharges)
     deallocate(input_args%xyzSites)
@@ -97,6 +102,7 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
     deallocate(multipoles)
     deallocate(pos_xyz)
     deallocate(not_moved_multipoles)
+    deallocate(moved_multipoles)
 end subroutine mexFunction
 
 

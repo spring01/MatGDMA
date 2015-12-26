@@ -31,6 +31,7 @@ classdef MatPsiGDMA < handle
         multipoles;
         mp_pos;
         mp_coeff;
+        mp_coeff_moved;
         
     end
     
@@ -83,7 +84,7 @@ classdef MatPsiGDMA < handle
             obj.density = obj.Psi4OccOrb2GaussianDensity(occOrb);
             
             %!!! GDMA DRIVER MEX !!!
-            [multipoles_, obj.mp_pos, obj.mp_coeff] = ...
+            [multipoles_, obj.mp_pos, obj.mp_coeff, obj.mp_coeff_moved] = ...
                 MatPsiGDMA.matgdma_mex(obj);
             % output
             multipoles_ = multipoles_(2:end, 1:length(obj.limit));
@@ -114,7 +115,7 @@ classdef MatPsiGDMA < handle
     methods (Static, Access = private)
         
         % mex claimed as a static mathod (to wrap it under @folder)
-        [multipoles_, pos_xyz, not_moved] = matgdma_mex(struct);
+        [multipoles_, pos_xyz, not_moved, moved] = matgdma_mex(struct);
         
     end
     

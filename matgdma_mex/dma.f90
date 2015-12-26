@@ -27,7 +27,7 @@ PRIVATE
 PUBLIC dma_main, c, ex, cs, cp, iax, kmin, kmax, kstart, katom, ktype, &
     kng, kloc, maxcen, maxbfn, maxs, nat, name, nshell, title, &
     zan, Qfactor, echarge, bohr, rfact, punchfile, user_given_limit, &
-    lmax, q, bigexp, mp_pos, mp_coeff
+    lmax, q, bigexp, mp_pos, mp_coeff, mp_coeff_moved
 
 INTEGER, PARAMETER :: dp=kind(1d0)
 
@@ -74,7 +74,7 @@ DATA IZ(36:56) /0,0,5,0,1,0,1,4,4,0,2,0,2,3,3,1,1,3,1,2,2/
 INTEGER, ALLOCATABLE :: limit(:), user_given_limit(:)
 REAL(dp), ALLOCATABLE :: xs(:,:), radius(:), q(:,:)
 INTEGER :: num_all_prim
-REAL(dp), ALLOCATABLE :: mp_pos(:,:), mp_coeff(:,:)
+REAL(dp), ALLOCATABLE :: mp_pos(:,:), mp_coeff(:,:), mp_coeff_moved(:,:)
 REAL(dp) :: rt(0:20), binom(0:20,0:20), rtbinom(0:20,0:20),         &
     d(56,56)
 
@@ -491,22 +491,23 @@ end if
 
 if (allocated(limit)) deallocate(limit,xs,radius,q)
 allocate(limit(maxs),xs(3,maxs),radius(maxs),q(0:121,maxs),stat=ok)
-if (allocated(mp_coeff)) deallocate(mp_coeff)
+
 num_all_prim = size(ex)
-allocate(mp_coeff(121,num_all_prim*num_all_prim),stat=ok)
-mp_coeff(:,:) = 0d0
-if (allocated(mp_pos)) deallocate(mp_pos)
-allocate(mp_pos(3,num_all_prim*num_all_prim),stat=ok)
-mp_pos(:,:) = 0d0
+allocate(mp_coeff(121, num_all_prim*num_all_prim), stat=ok)
+mp_coeff(:, :) = 0d0
+
+allocate(mp_coeff_moved(121*maxs, num_all_prim*num_all_prim), stat=ok)
+mp_coeff_moved(:, :) = 0d0
+
+allocate(mp_pos(3, num_all_prim*num_all_prim), stat=ok)
+mp_pos(:, :) = 0d0
+
 if (ok>0) call die("Can't allocate site arrays")
 
 !  ATOMS (default choice of sites)
 call atom_sites
 
-limit = 0
-do i = 1, ns
-    limit(i) = user_given_limit(i)
-end do
+limit(:) = user_given_limit(:)
 
 !  Read input keywords
 general=.true.
@@ -1415,11 +1416,17 @@ LOGICAL :: ieqj, iieqjj, do_quadrature
 INTEGER :: i, i1, i2, ia, ib, ii, ii1, ii2, ig, iq,                    &
     j, j1, j2, jb, jj, jj1, jj2, jg, jgmax, k, k1, k2,                 &
     l, la, lb, loci, locj, lq,                                  &
-    m, ma, mb, mx, my, mz, mini, maxi, minj, maxj, nq
+    m, ma, mb, mx, my, mz, mini, maxi, minj, maxj, nq, &
+    pair_index, copy_i, copy_j
 REAL(dp) :: aa, ai, arri, aj, ci, cj, dum, e, fac, f, g,               &
     p, pax, pay, paz, pq, px, py, pz, rr, s, t, xi, xj, xa, xb,        &
     xji, xk, xp, xas, xbs, yi, yj, ya, yb, yji, yk, yp, yas, ybs,      &
     za, zas, zb, zbs, zk, zp, zi, zj, zji
+
+REAL(dp), ALLOCATABLE :: old_q(:,:)
+
+allocate(old_q(121, maxs))
+old_q(:, :) = 0d0
 
 do_quadrature=.false.
 
@@ -1668,16 +1675,26 @@ do i=1,nat
                   11f10.6: / 13f10.6: / 15f10.6: / 17f10.6: / 19f10.6: / &
                   21f10.6)
               
-              mp_pos(1, (ig-1)*num_all_prim + jg) = xp
-              mp_pos(2, (ig-1)*num_all_prim + jg) = yp
-              mp_pos(3, (ig-1)*num_all_prim + jg) = zp
+              pair_index = (ig-1)*num_all_prim + jg
+              mp_pos(1, pair_index) = xp
+              mp_pos(2, pair_index) = yp
+              mp_pos(3, pair_index) = zp
               
-              mp_coeff(:, (ig-1)*num_all_prim + jg) = qt(:)
+              mp_coeff(:, pair_index) = qt(:)
               
               
 !  Move multipoles to expansion centre nearest to overlap centre P.
+              
+              old_q(:, :) = q(1:, :)
               call moveq(xp,yp,zp)
-
+              
+              do copy_j = 1,maxs
+                do copy_i = 1,121
+                  mp_coeff_moved((copy_j - 1) * 121 + copy_i, pair_index) = &
+                    q(copy_i, copy_j) - old_q(copy_i, copy_j)
+                end do
+              end do
+              
             else
 !  General case. Use integration over grid to assign multipole moments
 !  to atoms.

@@ -15,7 +15,7 @@ END TYPE
 
 CONTAINS
 
-SUBROUTINE gdma_driver_routine(q_out, mp_pos_out, mp_coeff_out, input_args)
+SUBROUTINE gdma_driver_routine(q_out, mp_pos_out, mp_coeff_out, mp_coeff_moved_out, input_args)
 
 !  Distributed Multipole Analysis for Gaussian Wavefunctions
 !
@@ -52,7 +52,7 @@ CHARACTER(LEN=8) :: whichd="SCF"
 CHARACTER(LEN=24) :: datestring
 
 !  Maximum number of sites is number of atoms + nextra
-INTEGER :: nextra=16
+INTEGER :: nextra=0
 INTEGER :: ncoorb, maxl, cmax, nprim, nx, num, n, ich, mul, nbf
 INTEGER, ALLOCATABLE :: shell_type(:), shell_nfuncs(:)
 INTEGER :: i, j, k, kp=0
@@ -80,7 +80,9 @@ type(gdma_input), intent(in) :: input_args
 
 ! output arguments
 real(dp), allocatable, intent(out) :: q_out(:,:)
-real(dp), allocatable, intent(out) :: mp_pos_out(:,:), mp_coeff_out(:,:)
+real(dp), allocatable, intent(out) :: mp_pos_out(:,:), &
+                                      mp_coeff_out(:,:), &
+                                      mp_coeff_moved_out(:,:)
 
 fchk=.false.
 first=.true.
@@ -384,6 +386,7 @@ call dma_main(dtri,kp)
 q_out = q
 mp_pos_out = mp_pos
 mp_coeff_out = mp_coeff
+mp_coeff_moved_out = mp_coeff_moved
 
 deallocate(zan)
 deallocate(c)

@@ -13,6 +13,11 @@ orb = mp.SCF_OrbitalAlpha();
 occOrb = orb(:, 1:mp.Molecule_NumElectrons()/2);
 
 gdma.RunGDMA(occOrb);
-gdma.RemoveCore();
+% gdma.RemoveCore();
+
+moved = zeros(121, 3, 225);
+for i = 1:225
+    moved(:, :, i) = reshape(gdma.mp_coeff_moved(:, i), 121, []);
+end
 
 
